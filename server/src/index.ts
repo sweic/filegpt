@@ -1,0 +1,25 @@
+import express from "express";
+import bodyParser from "body-parser";
+import { streamPdf } from "./functions/pdf";
+import multer from "multer";
+import cors from "cors";
+import { streamAudio } from "./functions/audio";
+import { chat } from "./functions/chain";
+import { sse } from "./functions/sse";
+import dotenv from "dotenv";
+dotenv.config();
+const app = express();
+const router = express.Router();
+const upload = multer({ dest: "./tmp" });
+const port = process.env.PORT || 8080;
+app.use(cors({ origin: process.env.CLIENT_URL }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+router.get("/sse", sse.init);
+router.post("/pdf", upload.single("file"), streamPdf);
+router.post("/audio", upload.single("file"), streamAudio);
+router.post("/chat", chat);
+app.use("/", router);
+app.listen(port, () => {
+  console.log("Express server listening on port 5000");
+});
